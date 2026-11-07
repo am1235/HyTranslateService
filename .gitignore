@@ -1,0 +1,30 @@
+# ============================================================
+# HyTranslateService .gitignore
+# 仅排除构建产物、本地状态与下载的大模型文件；
+# 源码（含 vendored 的 HyMT2Sharp/）均纳入版本控制。
+# ============================================================
+
+# --- 构建产物（.NET / MSBuild）---
+# 注意：bin/obj/publish 仅排除各工程（含 vendored 的 HyMT2Sharp/）的构建产物；
+# HyMT2Sharp/ 的源码（*.cs）、LICENSE、NOTICE 须随仓库发布，不会被上述规则排除。
+bin/
+obj/
+publish/
+[Bb]in/
+[Oo]bj/
+
+# --- IDE / 编辑器 ---
+.vs/
+*.user
+*.suo
+*.userprefs
+*.user
+
+# --- 运行时下载的大模型文件（自动获取，体积巨大）---
+models/
+
+# --- 操作系统 / 通用 ---
+.DS_Store
+Thumbs.db
+*.log
+~/error_log.txt

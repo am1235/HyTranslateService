@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="HyMT2Sharp/HyMT2Sharp.csproj" />
+  <Project Path="HyTranslateService/HyTranslateService.csproj" />
+</Solution>

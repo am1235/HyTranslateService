@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <style>
+      .primary { fill: #1F3A5F; }
+      .accent { fill: #2FB6B2; }
+      .shield { fill: #365F8A; }
+    </style>
+  </defs>
+
+  <!-- Outer ring -->
+  <circle class="primary" cx="256" cy="256" r="140" fill="none" stroke="#1F3A5F" stroke-width="6"/>
+
+  <!-- Globe lines -->
+  <ellipse class="primary" cx="256" cy="256" rx="140" ry="52" fill="none" stroke="#1F3A5F" stroke-width="4"/>
+  <path class="primary" d="M116 256 H396" stroke="#1F3A5F" stroke-width="4" fill="none"/>
+  <path class="primary" d="M256 116 V396" stroke="#1F3A5F" stroke-width="4" fill="none"/>
+
+  <!-- Left speech bubble -->
+  <path class="accent" d="M172 200 A28 28 0 0 0 144 228 V272 A28 28 0 0 0 172 300 H210 L224 312 V300 A28 28 0 0 0 238 272 V228 A28 28 0 0 0 210 200 Z"/>
+
+  <!-- Right speech bubble -->
+  <path class="accent" d="M340 200 A28 28 0 0 1 368 228 V272 A28 28 0 0 1 340 300 H302 L288 312 V300 A28 28 0 0 1 274 272 V228 A28 28 0 0 1 302 200 Z"/>
+
+  <!-- CPU chip center -->
+  <rect class="shield" x="240" y="240" width="32" height="32" rx="4"/>
+  <path class="primary" d="M240 240 L232 232 M272 240 L280 232 M240 272 L232 280 M272 272 L280 280" stroke="#1F3A5F" stroke-width="4" stroke-linecap="round"/>
+  <path class="primary" d="M256 240 V232 M256 280 V288 M240 256 H232 M272 256 H280" stroke="#1F3A5F" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- Shield base -->
+  <path class="shield" d="M256 352 C210 340 180 316 180 288 V272 H200 V288 C200 304 226 324 256 332 C286 324 312 304 312 288 V272 H332 V288 C332 316 302 340 256 352 Z" fill="#365F8A"/>
+</svg>

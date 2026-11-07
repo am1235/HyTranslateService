@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Sdcb.$(MSBuildProjectName)</RootNamespace>
+    <AssemblyName>Sdcb.$(MSBuildProjectName)</AssemblyName>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Deterministic>true</Deterministic>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Description>Hy-MT2 hunyuan-dense inference: GGUF, tokenize, KV cache, CPU (SIMD), Metal and Vulkan backends.</Description>
+    <PackageTags>$(PackageTags);linqpad-samples</PackageTags>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="linqpad-samples\*.linq" Pack="true" PackagePath="linqpad-samples" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- SPIR-V binaries are committed next to the .comp sources; regenerate with
+         src/HyMT2Sharp/Backends/Vulkan/tools/build-shaders.bat (glslc, dev-time only). -->
+    <EmbeddedResource Include="Backends\Vulkan\Shaders\*.spv" />
+    <None Remove="Backends\Vulkan\Shaders\*.comp" />
+    <None Remove="Backends\Vulkan\Shaders\*.spv" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sdcb.HyMT2Sharp.Tests" />
+  </ItemGroup>
+</Project>

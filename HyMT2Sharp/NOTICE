@@ -1,0 +1,30 @@
+HyMT2Sharp — Third-Party Notice (Vendored Copy)
+================================================
+
+This directory contains a vendored copy of:
+
+    HyMT2Sharp
+    Source: https://github.com/sdcb/HyMT2Sharp
+    License: Apache License 2.0 (Copyright sdcb)
+    Upstream version vendored: 2.0.0
+
+The source is included verbatim from the upstream repository with the
+following LOCAL MODIFICATIONS applied for this project:
+
+1. Vulkan backend — CoherentDeviceLocal heap gate
+   File: Backends/Vulkan/VkDevice.cs
+   Change: A `CoherentDeviceLocal` memory type is now only preferred when the
+   corresponding DEVICE_LOCAL|HOST_VISIBLE|HOST_COHERENT heap is at least
+   1 GiB (MinCoherentDeviceLocalBytes = 1UL << 30). On GPUs where that heap
+   is small (e.g. RTX 4070 Ti SUPER exposes only ~214 MB), the upstream
+   behaviour of unconditionally preferring that heap caused
+   VK_ERROR_OUT_OF_DEVICE_MEMORY. With this change the allocator falls back
+   to a plain HOST_VISIBLE|HOST_COHERENT buffer, matching the CPU/SIMD path.
+
+   The matching `NewStorageBuffer` allocation logic in VkDevice.cs was also
+   updated to honour the new size gate.
+
+No other source files were modified. The rest of the code is unchanged from
+the upstream 2.0.0 release.
+
+Upstream license text: see LICENSE in this directory.

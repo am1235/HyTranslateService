@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>HyTrans</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="referrer" content="no-referrer">
+    <meta http-equiv="cache-control" content="no-cache">
+    <link rel="icon" href="./images/favicon.ico">
+    <link rel="stylesheet" href="./lib/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="./css/app.css" media="all">
+    <script src="./js/settings.js" charset="utf-8"></script>
+    <script src="./js/i18n-config.js" charset="utf-8"></script>
+</head>
+<body class="hy-body">
+
+<div class="hy-app">
+    <header class="hy-header">
+        <div class="hy-brand">
+            <img class="hy-logo-img" src="./images/favicon.ico" alt="HyTrans">
+            <div class="hy-brand-text">
+                <h1 data-i18n="app.name">HyTrans</h1>
+                <p data-i18n="app.slogan">本地 Hy-MT2 翻译 · CPU / GPU 推理 · 全程离线</p>
+            </div>
+        </div>
+
+        <div class="hy-header-actions">
+            <span class="hy-status is-pending" id="signalrStatus">
+                <i class="hy-dot"></i>
+                <span id="signalrStatusText" data-i18n="app.connecting">连接中…</span>
+            </span>
+            <button type="button" class="layui-btn layui-btn-primary layui-btn-sm" id="btnApi">
+                <i class="layui-icon layui-icon-code-circle"></i>
+                <span data-i18n="header.api">WebAPI 说明</span>
+            </button>
+            <button type="button" class="layui-btn layui-btn-primary layui-btn-sm" id="btnMcp">
+                <i class="layui-icon layui-icon-link"></i>
+                <span data-i18n="header.mcp">MCP 接入</span>
+            </button>
+            <button type="button" class="layui-btn layui-btn-primary layui-btn-sm" id="btnLanguage">
+                <i class="layui-icon layui-icon-transfer"></i>
+                <span id="languageLabel">简体中文</span>
+            </button>
+            <button type="button" class="layui-btn layui-btn-primary layui-btn-sm" id="btnTheme"
+                    data-i18n-title="header.themeMode">
+                <i class="layui-icon layui-icon-moon" id="themeIcon"></i>
+                <span data-i18n="header.themeMode">明暗模式</span>
+            </button>
+            <a class="layui-btn layui-btn-primary layui-btn-sm" id="btnHome" href="https://github.com/am1235/HyTranslateService"
+               target="_blank" rel="noopener" data-i18n-title="header.home">
+                <i class="layui-icon layui-icon-github"></i>
+                <span data-i18n="header.home">项目主页</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="hy-main">
+        <div class="layui-row layui-col-space10">
+            <div class="layui-col-xs12">
+                <div class="hy-card">
+                    <div class="hy-card-head">
+                        <h2 data-i18n="option.title">翻译设置</h2>
+                        <div class="hy-head-right">
+                            <button type="button" class="layui-btn layui-btn-primary layui-btn-xs" id="btnSwap"
+                                    data-i18n-title="action.swap">
+                                <i class="layui-icon layui-icon-transfer"></i>
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary layui-btn-xs" id="btnRefreshModels"
+                                    data-i18n-title="option.reloadModels">
+                                <i class="layui-icon layui-icon-refresh"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="hy-card-body hy-settings-body">
+                        <div class="layui-form" lay-filter="hyForm">
+                            <div class="layui-row layui-col-space10">
+                                <div class="layui-col-xs12 layui-col-sm2">
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label" data-i18n="option.sourceLang">源语言</label>
+                                        <div class="layui-input-block">
+                                            <select id="sourceLang" lay-filter="sourceLang"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="layui-col-xs12 layui-col-sm2">
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label" data-i18n="option.targetLang">目标语言</label>
+                                        <div class="layui-input-block">
+                                            <select id="targetLang" lay-filter="targetLang"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="layui-col-xs12 layui-col-sm3">
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label" data-i18n="option.model">翻译模型</label>
+                                        <div class="layui-input-block">
+                                            <select id="model" lay-filter="model"></select>
+                                        </div>
+                                        <div class="layui-word-aux" data-i18n="option.modelHint">选择未下载的模型会自动从 Hugging Face 下载（访问受限时自动切换 hf-mirror.com 镜像站）。</div>
+                                    </div>
+                                </div>
+                                <div class="layui-col-xs12 layui-col-sm6 layui-col-md3">
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label" data-i18n="option.engine">推理引擎</label>
+                                        <div class="layui-input-block">
+                                            <select id="engine" lay-filter="engine"></select>
+                                        </div>
+                                        <div class="layui-word-aux" data-i18n="option.engineHint">auto = 有可用 GPU 就用，加载失败自动回落 CPU；GPU = 强制显卡，不可用时报错不降级。</div>
+                                    </div>
+                                </div>
+                                <div class="layui-col-xs12 layui-col-sm6 layui-col-md2">
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label" data-i18n="option.kvCache">KV 缓存</label>
+                                        <div class="layui-input-block">
+                                            <select id="kvCache" lay-filter="kvCache"></select>
+                                        </div>
+                                        <div class="layui-word-aux" data-i18n="option.kvCacheHint">只影响内存与预热速度，不改变译文。</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-row layui-col-space10">
+            <div class="layui-col-xs12">
+                <div class="hy-card hy-card-collapse">
+                    <div class="layui-collapse" lay-filter="hyAdvanced">
+                        <div class="layui-colla-item">
+                            <h2 class="layui-colla-title">
+                                <span data-i18n="option.advanced">高级选项</span>
+                                <button type="button" class="layui-btn layui-btn-primary layui-btn-xs" id="btnResetAdvanced"
+                                        data-i18n-title="option.resetAdvanced">
+                                    <i class="layui-icon layui-icon-refresh"></i>
+                                </button>
+                            </h2>
+                            <div class="layui-colla-content">
+                                <div class="layui-form hy-adv-form" lay-filter="hyAdvForm">
+                                    <div class="layui-row layui-col-space10">
+                                        <div class="layui-col-xs12 layui-col-sm3">
+                                            <div class="layui-form-item">
+                                                <label class="layui-form-label" data-i18n="option.segmentChars">分段字数</label>
+                                                <div class="layui-input-block">
+                                                    <input type="number" id="segmentChars" class="layui-input"
+                                                           min="80" max="6000" step="20">
+                                                </div>
+                                                <div class="layui-word-aux" id="segmentCharsHint"
+                                                     data-i18n="option.segmentCharsHint">范围 80 ~ {max}，越小越省内存，越大上下文越完整。</div>
+                                            </div>
+                                        </div>
+                                        <div class="layui-col-xs12 layui-col-sm3">
+                                            <div class="layui-form-item">
+                                                <label class="layui-form-label" data-i18n="option.maxTokens">最大生成 token</label>
+                                                <div class="layui-input-block">
+                                                    <input type="number" id="maxTokens" class="layui-input"
+                                                           min="0" max="4096" step="16" value="0">
+                                                </div>
+                                                <div class="layui-word-aux" data-i18n="option.maxTokensHint">0 = 由模型自行决定；越大单次生成越长，耗时也越多。</div>
+                                            </div>
+                                        </div>
+                                        <div class="layui-col-xs12 layui-col-sm3">
+                                            <div class="layui-form-item">
+                                                <label class="layui-form-label" data-i18n="option.promptStyle">提示词模板</label>
+                                                <div class="layui-input-block">
+                                                    <select id="promptStyle" lay-filter="promptStyle"></select>
+                                                </div>
+                                                <div class="layui-word-aux" data-i18n="option.promptStyleHint">不同的提示词模板会明显影响译文风格与术语命中率。</div>
+                                            </div>
+                                        </div>
+                                        <div class="layui-col-xs12 layui-col-sm3">
+                                            <div class="layui-form-item">
+                                                <label class="layui-form-label" data-i18n="option.promptLanguage">提示词语言</label>
+                                                <div class="layui-input-block">
+                                                    <select id="promptLanguage" lay-filter="promptLanguage">
+                                                        <option value="zh" data-i18n="promptLang.zh">中文</option>
+                                                        <option value="en" data-i18n="promptLang.en">English</option>
+                                                    </select>
+                                                </div>
+                                                <div class="layui-word-aux" data-i18n="option.promptLanguageHint">提示词用哪种语言书写；非中文大模型建议保持 English。</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="layui-row layui-col-space10">
+                                        <div class="layui-col-xs12 layui-col-sm3">
+                                            <div class="layui-form-item">
+                                                <label class="layui-form-label" data-i18n="option.temperature">温度</label>
+                                                <div class="layui-input-block">
+                                                    <div class="hy-slider-row">
+                                                        <span class="hy-slider-val" id="temperatureVal">0.70</span>
+                                                        <div class="hy-slider-box" id="temperatureSlider"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="layui-word-aux" data-i18n="option.temperatureHint">越高越发散有创意，越低越确定稳定；翻译通常取低值。</div>
+                                            </div>
+                                        </div>
+                                        <div class="layui-col-xs12 layui-col-sm3">
+                                            <div class="layui-form-item">
+                                                <label class="layui-form-label" data-i18n="option.topP">核采样 top_p</label>
+                                                <div class="layui-input-block">
+                                                    <div class="hy-slider-row">
+                                                        <span class="hy-slider-val" id="topPVal">0.60</span>
+                                                        <div class="hy-slider-box" id="topPSlider"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="layui-word-aux" data-i18n="option.topPHint">核采样：只从累计概率达 top_p 的候选词中采样，控制多样性。</div>
+                                            </div>
+                                        </div>
+                                        <div class="layui-col-xs12 layui-col-sm3">
+                                            <div class="layui-form-item">
+                                                <label class="layui-form-label" data-i18n="option.topK">top_k</label>
+                                                <div class="layui-input-block">
+                                                    <div class="hy-slider-row">
+                                                        <span class="hy-slider-val" id="topKVal">20</span>
+                                                        <div class="hy-slider-box" id="topKSlider"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="layui-word-aux" data-i18n="option.topKHint">只考虑概率最高的前 K 个词，0 = 关闭该限制。</div>
+                                            </div>
+                                        </div>
+                                        <div class="layui-col-xs12 layui-col-sm3">
+                                            <div class="layui-form-item">
+                                                <label class="layui-form-label" data-i18n="option.repetitionPenalty">重复惩罚</label>
+                                                <div class="layui-input-block">
+                                                    <div class="hy-slider-row">
+                                                        <span class="hy-slider-val" id="repetitionPenaltyVal">1.05</span>
+                                                        <div class="hy-slider-box" id="repetitionPenaltySlider"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="layui-word-aux" data-i18n="option.repetitionPenaltyHint">&gt;1 抑制重复，&lt;1 鼓励重复；过大易使语句生硬。</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="layui-row layui-col-space10 hy-adv-row-tall">
+                                        <div class="layui-col-xs12 layui-col-sm4">
+                                            <div class="layui-form-item layui-form-text">
+                                                <label class="layui-form-label" data-i18n="option.glossary">术语表</label>
+                                                <div class="layui-input-block">
+                                                    <textarea id="glossary" class="layui-textarea hy-adv-textarea" spellcheck="false"
+                                                              data-i18n-placeholder="option.glossaryPlaceholder"></textarea>
+                                                </div>
+                                                <div class="layui-word-aux" data-i18n="option.glossaryHint">每行一条「原文=译文」，可显著提升专有名词一致性。</div>
+                                            </div>
+                                        </div>
+                                        <div class="layui-col-xs12 layui-col-sm4">
+                                            <div class="layui-form-item layui-form-text">
+                                                <label class="layui-form-label" data-i18n="option.background">背景信息</label>
+                                                <div class="layui-input-block">
+                                                    <textarea id="background" class="layui-textarea hy-adv-textarea" spellcheck="false"
+                                                              data-i18n-placeholder="option.backgroundPlaceholder"></textarea>
+                                                </div>
+                                                <div class="layui-word-aux" data-i18n="option.backgroundHint">补充领域 / 场景信息，帮助模型理解全文语境。</div>
+                                            </div>
+                                        </div>
+                                        <div class="layui-col-xs12 layui-col-sm2">
+                                            <div class="layui-form-item">
+                                                <label class="layui-form-label" data-i18n="option.targetStyle">目标风格</label>
+                                                <div class="layui-input-block">
+                                                    <div class="hy-multiselect" id="targetStyleMs">
+                                                        <div class="hy-ms-trigger" tabindex="0">
+                                                            <span class="hy-ms-placeholder" data-i18n="option.targetStylePlaceholder">点击选择风格…</span>
+                                                        </div>
+                                                        <div class="hy-ms-panel" hidden>
+                                                            <label class="hy-ms-opt"><input type="checkbox" value="口语化"> <span data-i18n="style.colloquial">口语化</span></label>
+                                                            <label class="hy-ms-opt"><input type="checkbox" value="正式书面"> <span data-i18n="style.formal">正式书面</span></label>
+                                                            <label class="hy-ms-opt"><input type="checkbox" value="简洁技术文档"> <span data-i18n="style.techdoc">简洁技术文档</span></label>
+                                                            <div class="hy-ms-custom">
+                                                                <input type="text" class="layui-input hy-ms-custom-input" data-i18n-placeholder="option.targetStyleCustomPlaceholder">
+                                                                <button type="button" class="layui-btn layui-btn-xs hy-ms-custom-add" data-i18n="option.add">添加</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <input type="hidden" id="targetStyle" value="">
+                                                </div>
+                                                <div class="layui-word-aux" data-i18n="option.targetStyleHint">可多选并自定义，多种风格会叠加生效。</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-row layui-col-space10 hy-row-equal">
+            <div class="layui-col-xs12 layui-col-md6">
+                <div class="hy-card">
+                    <div class="hy-card-head">
+                        <h2 data-i18n="input.title">原文</h2>
+                        <div class="hy-head-right">
+                            <span id="inputMeta"></span>
+                        </div>
+                    </div>
+
+                    <div class="hy-card-body" id="sourceDrop">
+                        <textarea id="source" class="hy-source" spellcheck="false"
+                                  data-i18n-placeholder="input.placeholder"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-xs12 layui-col-md6">
+                <div class="hy-card">
+                    <div class="hy-card-head">
+                        <h2 data-i18n="output.title">译文</h2>
+                        <div class="hy-head-right">
+                            <span id="footMeta"></span>
+                            <span id="outputMeta" data-i18n="output.ready">就绪</span>
+                        </div>
+                    </div>
+
+                    <div class="hy-progress-wrap">
+                        <div class="layui-progress layui-progress-big" lay-filter="hyProgress" lay-showpercent="true">
+                            <div class="layui-progress-bar layui-bg-green" lay-percent="0%"></div>
+                        </div>
+                        <div class="hy-stats">
+                            <span class="hy-stat-strong" id="statSegments"></span>
+                            <span id="statElapsed"></span>
+                            <span id="statSpeed"></span>
+                            <span id="statEta"></span>
+                            <span id="statModel"></span>
+                        </div>
+                    </div>
+
+                    <div class="hy-output" id="output">
+                        <div class="hy-placeholder">
+                            <div class="hy-ph-icon"><i class="layui-icon layui-icon-form"></i></div>
+                            <p data-i18n="output.placeholder">翻译结果会在此实时逐字显示</p>
+                            <p class="hy-ph-sub" data-i18n="output.placeholderSub">长文本自动拆段 · 流式输出 · 可随时终止</p>
+                        </div>
+                    </div>
+
+                    <div class="hy-stream-note" id="streamNote" hidden>
+                        <span class="hy-spinner"></span>
+                        <span id="streamNoteText" data-i18n="output.translating">正在翻译…</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="layui-row layui-col-space10">
+            <div class="layui-col-xs12">
+                <div class="hy-card">
+                    <div class="hy-card-body hy-control-bar">
+                        <button type="button" class="layui-btn layui-btn-normal" id="btnTranslate"
+                                data-i18n="action.translate">开始翻译</button>
+                        <button type="button" class="layui-btn layui-btn-danger" id="btnStop" disabled
+                                data-i18n="action.stop">终止翻译</button>
+                        <button type="button" class="layui-btn layui-btn-primary" id="btnClear"
+                                data-i18n="action.clear">清空文本</button>
+                        <button type="button" class="layui-btn layui-btn-primary" id="btnBigFile"
+                                data-i18n="action.bigFile">文件翻译</button>
+                        <span class="hy-spacer"></span>
+                        <button type="button" class="layui-btn layui-btn-primary" id="btnCopy"
+                                data-i18n="action.copyResult">复制译文</button>
+                        <button type="button" class="layui-btn layui-btn-primary" id="btnDownload"
+                                data-i18n="action.download">保存译文 .txt</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script src="./lib/layui/layui.js" charset="utf-8"></script>
+<script src="./js/lay-config.js" charset="utf-8"></script>
+<script src="./lib/signalr/dist/browser/signalr.min.js" charset="utf-8"></script>
+<script src="./js/app.js" charset="utf-8"></script>
+<script src="./js/mcp-modal.js" charset="utf-8"></script>
+<script src="./js/api-modal.js" charset="utf-8"></script>
+<script src="./js/bigfile-modal.js" charset="utf-8"></script>
+<script src="./js/boot.js" charset="utf-8"></script>
+
+</body>
+</html>

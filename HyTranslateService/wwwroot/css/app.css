@@ -1,0 +1,1133 @@
+/* ═══════════════════════════════════════════════════════════════
+   HyTrans WebUI —— 页面样式
+   基于 layui-v2.13.9 默认（亮色）主题做业务层扩展
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+    --hy-bg: #f5f7fb;
+    --hy-surface: #ffffff;
+    --hy-surface-soft: #fafbfe;
+    --hy-border: #e6e9f0;
+    --hy-border-soft: #eef1f6;
+    --hy-text: #24292f;
+    --hy-text-sub: #5a6472;
+    --hy-text-dim: #8a94a6;
+    --hy-primary: #16baaa;
+    --hy-primary-soft: #e6f8f6;
+    --hy-accent: #1e9fff;
+    --hy-accent-soft: #eaf5ff;
+    --hy-danger: #ff5722;
+    --hy-warn: #ffb800;
+    --hy-success: #14b866;
+    --hy-radius: 8px;
+    --hy-shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 8px 24px -12px rgba(16, 24, 40, .12);
+}
+
+html,
+body {
+    height: 100%;
+}
+
+    body.hy-body {
+        margin: 0;
+        background: var(--hy-bg);
+        color: var(--hy-text);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+        font-size: 14px;
+        -webkit-font-smoothing: antialiased;
+    }
+
+/* ───────────── 布局 ───────────── */
+
+.hy-app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.hy-header {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 20px;
+    background: var(--hy-surface);
+    border-bottom: 1px solid var(--hy-border);
+    box-shadow: 0 1px 2px rgba(16, 24, 40, .03);
+    position: sticky;
+    top: 0;
+    z-index: 900;
+}
+
+.hy-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.hy-logo-img {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 auto;
+    display: block;
+}
+
+.hy-brand-text {
+    min-width: 0;
+}
+
+    .hy-brand-text h1 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 1.3;
+        white-space: nowrap;
+    }
+
+    .hy-brand-text p {
+        margin: 0;
+        font-size: 12px;
+        color: var(--hy-text-dim);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+.hy-header-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.hy-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--hy-surface-soft);
+    border: 1px solid var(--hy-border);
+    font-size: 12px;
+    color: var(--hy-text-sub);
+    white-space: nowrap;
+}
+
+    .hy-status .hy-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--hy-text-dim);
+        flex: 0 0 auto;
+    }
+
+    .hy-status.is-online .hy-dot {
+        background: var(--hy-success);
+        box-shadow: 0 0 0 3px rgba(20, 184, 102, .16);
+    }
+
+    .hy-status.is-offline .hy-dot {
+        background: var(--hy-danger);
+        box-shadow: 0 0 0 3px rgba(255, 87, 34, .16);
+    }
+
+    .hy-status.is-pending .hy-dot {
+        background: var(--hy-warn);
+        animation: hy-pulse 1.2s ease-in-out infinite;
+    }
+
+@keyframes hy-pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: .3;
+    }
+}
+
+.hy-main {
+    flex: 1 1 auto;
+    display: flex; /* 主体自身也是纵向 flex，让「原文|译文」行吃掉剩余视口高度 */
+    flex-direction: column;
+    padding: 16px 20px 24px;
+    min-height: 0;
+}
+
+    /* 主体四段式：前三段（翻译设置 / 高级选项 / 及其它行）保持自然高度，
+   「原文|译文」一行（.hy-row-equal）伸展填满视口剩余高度 ——
+   页面加载后原文文本框与译文区自动占满屏幕，无需手动拉伸 */
+    .hy-main > .layui-row {
+        flex: 0 0 auto;
+    }
+
+    .hy-main > .hy-row-equal {
+        flex: 1 1 auto;
+        min-height: 0;
+    }
+
+/* 原文 | 译文：用 flex 让两栏等高、卡片对齐底部。
+   ⚠ 桌面端必须单行（flex-wrap: nowrap 在下方媒体查询里）：wrap 容器的行高会
+   跟随最高列的内容增长，长文本会把两列连同卡片撑到几千 px，越过底部按钮行
+   （2026-10-09 实测踩坑）。单行 + 容器有确定高度时，行高=容器高，列才能被压回。 */
+.hy-row-equal {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+    .hy-row-equal > [class*="layui-col-"] {
+        display: flex;
+        min-height: 0; /* 允许列随 flex 收缩，页面锁定视口时不撑出滚动条 */
+    }
+
+        .hy-row-equal > [class*="layui-col-"] > .hy-card {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+    /* 原文卡片体：纵向 flex，让 .hy-source 伸展填满卡片剩余高度 */
+    .hy-row-equal .hy-card-body {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .hy-row-equal .hy-output {
+        flex: 1 1 auto;
+        min-height: 0;
+    }
+
+/* ───────────── 卡片 ───────────── */
+
+.hy-card {
+    background: var(--hy-surface);
+    border: 1px solid var(--hy-border);
+    border-radius: var(--hy-radius);
+    box-shadow: var(--hy-shadow);
+    overflow: visible;
+}
+
+.hy-card-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--hy-border-soft);
+    background: var(--hy-surface-soft);
+    border-radius: var(--hy-radius) var(--hy-radius) 0 0;
+}
+
+    .hy-card-head h2 {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--hy-text-sub);
+        letter-spacing: .3px;
+    }
+
+    .hy-card-head .hy-head-right {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 12px;
+        color: var(--hy-text-dim);
+    }
+
+.hy-card-body {
+    padding: 8px;
+}
+
+/* 翻译设置卡片：表单项 layui 默认 margin-bottom:15px 会造成下宽上窄，归零并拉平上下留白 */
+.hy-settings-body {
+    padding: 10px 5px;
+}
+
+.hy-settings-body .layui-form-item {
+    margin-bottom: 0;
+}
+
+/* ───────────── 文本输入 ───────────── */
+
+.hy-source {
+    width: 100%;
+    flex: 1 1 auto; /* 在 .hy-row-equal 的卡片体内伸展，自动填满剩余高度 */
+    min-height: 120px;
+    padding: 12px;
+    border: 1px solid var(--hy-border);
+    border-radius: 6px;
+    background: var(--hy-surface-soft);
+    color: var(--hy-text);
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.75;
+    /* 内容超出时文本框内部出滚动条；禁止手动拖拽改高，避免撑破锁定视口的布局 */
+    resize: none;
+    overflow-y: auto;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+    box-sizing: border-box;
+}
+
+    .hy-source:focus {
+        border-color: var(--hy-primary);
+        box-shadow: 0 0 0 3px var(--hy-primary-soft);
+        background: #fff;
+    }
+
+/* 文件拖入原文区的悬停反馈（app.js 加/移除 .is-drag） */
+.hy-card-body.is-drag {
+    outline: 2px dashed var(--hy-primary);
+    outline-offset: -6px;
+}
+
+.hy-hint {
+    margin: 8px 0 0;
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--hy-text-dim);
+}
+
+/* ───────────── 设置区 ───────────── */
+
+/* 让 layui 的表单控件更贴合卡片 */
+.hy-card .layui-input,
+.hy-card .layui-textarea,
+.hy-card select {
+    border-radius: 6px;
+}
+
+.hy-card .layui-textarea {
+    min-height: 60px;
+    resize: vertical;
+    font-family: inherit;
+    line-height: 1.7;
+}
+
+.hy-slider-box {
+    padding: 2px 6px 0;
+}
+
+    .hy-slider-box .layui-slider {
+        margin: 6px 0 2px;
+    }
+
+/* 滑块与取值并排，避免标签挤占 80px 宽的表单标签 */
+.hy-slider-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+    .hy-slider-row .hy-slider-box {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+/* 数值在前、滑条在后；min-width 让四个滑条起点对齐（20 与 0.70 等宽占位） */
+.hy-slider-val {
+    flex: 0 0 auto;
+    min-width: 42px;
+    text-align: left;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: var(--hy-primary);
+}
+
+/* ───────────── 折叠面板（高级选项） ───────────── */
+
+.hy-card-collapse .layui-colla-title {
+    display: flex;
+    align-items: center;
+    height: auto;
+    min-height: 40px;
+    padding: 10px 14px 10px 34px;
+    line-height: 1.5;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--hy-text-sub);
+    letter-spacing: .3px;
+    background: var(--hy-surface-soft);
+}
+
+/* 标题文字占满剩余宽度，右侧的「恢复默认值」按钮自然靠右（与 hy-head-right 同视觉） */
+.hy-card-collapse .layui-colla-title > span {
+    flex: 1;
+}
+
+.hy-card-collapse .layui-colla-title .layui-btn {
+    flex-shrink: 0;
+}
+
+/* 箭头用 top:50% 居中（Layui 的展开旋转由它自己控制，这里不覆盖 transform） */
+.hy-card-collapse .layui-colla-icon {
+    left: 14px;
+    top: 50%;
+    margin-top: -7px;
+}
+
+.hy-card-collapse .layui-colla-content {
+    padding: 6px 14px 14px;
+    line-height: 1.6;
+    border-top: 1px solid var(--hy-border-soft);
+}
+
+/* ───────────── 操作按钮 ───────────── */
+
+/* 翻译控制条：一整行按钮，左侧为执行操作、右侧为产物操作 */
+.hy-control-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+    .hy-control-bar .hy-spacer {
+        flex: 1 1 auto;
+    }
+
+.hy-card .layui-btn {
+    border-radius: 6px;
+}
+
+/* ───────────── 输出区 ───────────── */
+
+.hy-progress-wrap {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--hy-border-soft);
+    background: var(--hy-surface-soft);
+}
+
+    .hy-progress-wrap .layui-progress {
+        margin: 0 0 10px;
+        background-color: #e9edf5;
+    }
+
+.hy-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    font-size: 12px;
+    color: var(--hy-text-dim);
+    font-variant-numeric: tabular-nums;
+}
+
+    .hy-stats .hy-stat-strong {
+        color: var(--hy-text-sub);
+        font-weight: 600;
+    }
+
+.hy-output {
+    padding: 14px;
+    min-height: 100px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    line-height: 1.8;
+}
+
+    .hy-output .hy-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-height: 120px;
+        color: var(--hy-text-dim);
+        text-align: center;
+    }
+
+        .hy-output .hy-placeholder .hy-ph-icon {
+            font-size: 26px;
+            color: var(--hy-primary);
+            opacity: .7;
+        }
+
+        .hy-output .hy-placeholder .hy-ph-sub {
+            font-size: 12px;
+        }
+
+/* 译文：纯文本累积显示（无分段占位符），流式时显示光标 */
+.hy-trans {
+    margin: 0;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--hy-text);
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.hy-caret {
+    display: none;
+    width: 7px;
+    height: 15px;
+    margin-left: 2px;
+    vertical-align: -3px;
+    background: var(--hy-primary);
+    opacity: .65;
+    animation: hy-caret 1s steps(2, start) infinite;
+}
+
+.hy-output.hy-streaming .hy-caret {
+    display: inline-block;
+}
+
+@keyframes hy-caret {
+    0%, 50% {
+        opacity: .65;
+    }
+
+    51%, 100% {
+        opacity: 0;
+    }
+}
+
+/* 流式提示条 */
+.hy-stream-note {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-top: 1px solid var(--hy-border-soft);
+    background: var(--hy-surface-soft);
+    font-size: 12px;
+    color: var(--hy-text-sub);
+}
+
+    .hy-stream-note[hidden] {
+        display: none;
+    }
+
+.hy-spinner {
+    width: 12px;
+    height: 12px;
+    flex: 0 0 auto;
+    border: 2px solid var(--hy-border);
+    border-top-color: var(--hy-primary);
+    border-radius: 50%;
+    animation: hy-spin .7s linear infinite;
+}
+
+@keyframes hy-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ───────────── MCP 弹窗 ───────────── */
+
+.hy-modal-mask {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(16, 24, 40, .45);
+}
+
+    .hy-modal-mask[hidden] {
+        display: none;
+    }
+
+.hy-modal {
+    width: min(760px, 100%);
+    max-height: 86vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--hy-surface);
+    border-radius: 10px;
+    box-shadow: 0 24px 64px -12px rgba(16, 24, 40, .38);
+    overflow: hidden;
+    /* 可缩放：右下角拖拽调整大小（resize 要求 overflow 非 visible，上面的 hidden 正好满足） */
+    resize: both;
+    min-width: 340px;
+    min-height: 220px;
+    max-width: 100%;
+}
+
+.hy-modal-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--hy-border-soft);
+}
+
+    .hy-modal-head h2 {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .hy-modal-head .hy-modal-close {
+        margin-left: auto;
+    }
+
+.hy-modal-body {
+    padding: 16px 18px 20px;
+    overflow-y: auto;
+}
+
+    .hy-modal-body h3 {
+        margin: 18px 0 8px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--hy-text-sub);
+    }
+
+        .hy-modal-body h3:first-child {
+            margin-top: 0;
+        }
+
+.hy-kv {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid var(--hy-border);
+    border-radius: 6px;
+    background: var(--hy-surface-soft);
+    font-size: 13px;
+}
+
+    .hy-kv code {
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow-x: auto;
+        white-space: nowrap;
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+        color: var(--hy-accent);
+    }
+
+.hy-modal-body pre {
+    margin: 0;
+    padding: 12px;
+    border: 1px solid var(--hy-border);
+    border-radius: 6px;
+    background: var(--hy-surface-soft);
+    color: var(--hy-text);
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.7;
+    overflow-x: auto;
+    white-space: pre;
+}
+
+.hy-tool-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 6px;
+}
+
+    .hy-tool-list li {
+        padding: 8px 12px;
+        border: 1px solid var(--hy-border-soft);
+        border-radius: 6px;
+        background: var(--hy-surface-soft);
+        font-size: 13px;
+        color: var(--hy-text-sub);
+        line-height: 1.7;
+    }
+
+    .hy-tool-list code {
+        display: inline-block;
+        margin-right: 8px;
+        padding: 1px 6px;
+        border-radius: 4px;
+        background: var(--hy-accent-soft);
+        color: var(--hy-accent);
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+        font-size: 12px;
+    }
+
+.hy-subhead {
+    margin: 14px 0 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--hy-text-sub);
+}
+
+.hy-loc-list {
+    margin: 8px 0 4px;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 4px;
+}
+
+    .hy-loc-list li {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        font-size: 12px;
+        line-height: 1.6;
+        color: var(--hy-text-sub);
+    }
+
+        .hy-loc-list b {
+            flex: 0 0 auto;
+            min-width: 56px;
+            color: var(--hy-text);
+            font-weight: 600;
+        }
+
+.hy-faq {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 10px;
+}
+
+    .hy-faq li {
+        padding: 10px 12px;
+        border: 1px solid var(--hy-border-soft);
+        border-left: 3px solid var(--hy-accent);
+        border-radius: 6px;
+        background: var(--hy-surface-soft);
+        font-size: 13px;
+        line-height: 1.7;
+        color: var(--hy-text-sub);
+    }
+
+        .hy-faq b {
+            display: block;
+            margin-bottom: 2px;
+            color: var(--hy-text);
+            font-weight: 600;
+        }
+
+/* ───────────── WebAPI 说明弹窗 ───────────── */
+
+.hy-api-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+    .hy-api-table td {
+        padding: 8px 10px;
+        border: 1px solid var(--hy-border-soft);
+        color: var(--hy-text-sub);
+        line-height: 1.6;
+        vertical-align: top;
+    }
+
+    .hy-api-table td:first-child {
+        white-space: nowrap;
+        width: 1%;
+    }
+
+    .hy-api-table td:nth-child(2) code {
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+        font-size: 12px;
+        color: var(--hy-accent);
+        word-break: break-all;
+    }
+
+.hy-method {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+    .hy-method.is-get {
+        background: var(--hy-accent-soft);
+        color: var(--hy-accent);
+    }
+
+    .hy-method.is-post {
+        background: rgba(82, 196, 26, .14);
+        color: #389e0d;
+    }
+
+.hy-endpoint-notes {
+    margin: 0;
+    padding-left: 18px;
+    display: grid;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--hy-text-sub);
+    line-height: 1.7;
+}
+
+    .hy-endpoint-notes code {
+        padding: 1px 5px;
+        border-radius: 4px;
+        background: var(--hy-accent-soft);
+        color: var(--hy-accent);
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+        font-size: 12px;
+    }
+
+/* ───────────── 文件翻译弹窗 ───────────── */
+
+.hy-bigfile-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    white-space: nowrap;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    color: var(--hy-accent);
+}
+
+    .hy-bigfile-name:empty::before {
+        content: '—';
+        color: var(--hy-text-dim);
+    }
+
+.hy-bigfile-progress {
+    margin: 16px 0 0;
+}
+
+.hy-bigfile-stat {
+    margin: 8px 0 0;
+    font-size: 12px;
+    color: var(--hy-text-sub);
+    line-height: 1.6;
+}
+
+.hy-bigfile-msg {
+    margin: 12px 0 0;
+    font-size: 13px;
+    color: var(--hy-accent);
+    line-height: 1.6;
+    min-height: 18px;
+    word-break: break-all;
+}
+
+.hy-bigfile-foot {
+    display: flex;
+    gap: 8px;
+    padding: 12px 18px;
+    border-top: 1px solid var(--hy-border-soft);
+    background: var(--hy-surface-soft);
+}
+
+/* ───────────── 高级选项（栅格化 + 小号说明） ───────────── */
+
+/* 高级选项用普通 layui-form，标签改为「上置」堆叠，列宽才不会被 110px 默认标签挤占。
+ * ⚠ `float: none` 不能删！保留浮动时占满整列的浮动标签会与 .layui-input-block 重叠，
+ * 把其后 flex 容器挤成 0 宽 —— 表现为采样滑块只剩圆点手柄（2026-09-30 踩坑）。 */
+.hy-adv-form .layui-form-label {
+    float: none !important;
+    width: 100% !important;
+    text-align: left;
+    padding: 0 0 4px;
+    line-height: 1.4;
+    color: var(--hy-text-sub);
+}
+
+.hy-adv-form .layui-input-block {
+    margin-left: 0 !important;
+    width: 100%;
+}
+
+.hy-adv-form .layui-form-item {
+    margin-bottom: 8px;
+}
+
+/* 下拉/数字输入撑满整列会随视口越变越宽（列内自适应），统一收窄 */
+.hy-adv-form .layui-input-block > .layui-input,
+.hy-adv-form .layui-input-block > .layui-form-select {
+    max-width: 260px;
+}
+
+/* 选项说明：用 Layui 自带的小号字说明样式 .layui-word-aux，强制块级显示在控件下方 */
+.hy-adv-form .layui-word-aux {
+    display: block;
+    margin: 4px 0 0;
+    padding: 0;
+    line-height: 1.1;
+    font-size: 12px;
+    color: var(--hy-text-dim) !important;
+    min-height: 16px;
+}
+
+/* 行 3（术语表 / 背景信息 / 目标风格）文本框高度约可写 6 行 */
+.hy-adv-row-tall .hy-adv-textarea {
+    min-height: 132px;
+    line-height: 1.7;
+}
+
+/* ── 目标风格多选组件 ── */
+.hy-multiselect {
+    position: relative;
+}
+
+.hy-ms-trigger {
+    min-height: 38px;
+    padding: 4px 28px 4px 8px;
+    border: 1px solid var(--hy-border);
+    border-radius: 6px;
+    background: var(--hy-surface-soft);
+    cursor: pointer;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+}
+
+    .hy-ms-trigger:focus {
+        border-color: var(--hy-primary);
+        box-shadow: 0 0 0 3px var(--hy-primary-soft);
+        outline: none;
+    }
+
+.hy-ms-placeholder {
+    color: var(--hy-text-dim);
+    font-size: 13px;
+}
+
+.hy-ms-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 1px 4px 1px 8px;
+    border-radius: 10px;
+    background: var(--hy-primary-soft);
+    color: var(--hy-primary);
+    font-size: 12px;
+    line-height: 18px;
+}
+
+.hy-ms-remove {
+    cursor: pointer;
+    font-size: 12px;
+    opacity: .7;
+}
+
+    .hy-ms-remove:hover {
+        opacity: 1;
+    }
+
+.hy-ms-panel {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 60;
+    width: 240px;
+    padding: 8px;
+    background: var(--hy-surface);
+    border: 1px solid var(--hy-border);
+    border-radius: 6px;
+    box-shadow: var(--hy-shadow);
+}
+
+    .hy-ms-panel[hidden] {
+        display: none;
+    }
+
+.hy-ms-opt {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px;
+    font-size: 13px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+    .hy-ms-opt:hover {
+        background: var(--hy-surface-soft);
+    }
+
+.hy-ms-custom {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.hy-ms-custom-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 30px;
+}
+
+/* 暗色皮肤下的多选组件表面色 */
+[data-theme="dark"] .hy-ms-trigger {
+    background: var(--hy-surface);
+    color: var(--hy-text);
+    border-color: var(--hy-border);
+}
+
+[data-theme="dark"] .hy-ms-panel {
+    background: var(--hy-surface);
+    color: var(--hy-text);
+    border-color: var(--hy-border);
+}
+
+/* ───────────── 响应式 ───────────── */
+
+/* 桌面端（≥992px，栅格保持两栏）：锁定视口高度，禁止整页滚动。
+   各区域改为内部滚动：原文/译文区内容超出各自滚动，高级选项展开后内容区限高滚动，
+   页面上所有元素（含底部按钮区）始终全部可见。 */
+@media screen and (min-width: 992px) {
+    html,
+    body {
+        overflow: hidden;
+    }
+
+    .hy-app {
+        height: 100vh;
+        height: 100dvh;
+    }
+
+    .hy-main {
+        overflow: hidden;
+    }
+
+    /* 原文|译文行改单行布局：两栏在 md 栅格下恒为 50%/50%，无需换行；
+       单行 + 容器有确定高度 → 行高=容器高，长文本不再把列撑破按钮行 */
+    .hy-row-equal {
+        flex-wrap: nowrap;
+    }
+
+    /* 高级选项展开时内容区限高（580px ≈ 头部+设置卡+折叠标题+按钮区+原文|译文行地板，实测校准；
+       1080p 视口给 500px，内容(~472px)完整显示。更矮的视口超出部分内部滚动兜底） */
+    .hy-card-collapse .layui-colla-content {
+        max-height: max(120px, calc(100vh - 580px));
+        overflow-y: auto;
+    }
+}
+
+@media (max-width: 640px) {
+    .hy-header {
+        flex-wrap: wrap;
+        padding: 10px 14px;
+    }
+
+    .hy-header-actions {
+        margin-left: 0;
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .hy-main {
+        padding: 12px 14px 20px;
+    }
+
+    .hy-brand-text p {
+        display: none;
+    }
+}
+
+/* ───────────── 暗色皮肤 ─────────────
+   只切换 CSS 变量即可翻转业务层配色；下面再补几处 Layui 原生控件
+   的表面色，保证下拉 / 输入框在暗色下可读。 */
+:root[data-theme="dark"] {
+    --hy-bg: #0f1419;
+    --hy-surface: #1a212b;
+    --hy-surface-soft: #232c38;
+    --hy-border: #2c3744;
+    --hy-border-soft: #28323e;
+    --hy-text: #e6edf3;
+    --hy-text-sub: #aeb9c6;
+    --hy-text-dim: #7c8696;
+    --hy-primary: #2bd4c0;
+    --hy-primary-soft: #163230;
+    --hy-accent: #4db8ff;
+    --hy-accent-soft: #14304a;
+    --hy-danger: #ff7043;
+    --hy-warn: #ffc14d;
+    --hy-success: #3ddc97;
+    --hy-shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -12px rgba(0, 0, 0, .6);
+}
+
+[data-theme="dark"] .layui-input,
+[data-theme="dark"] .layui-textarea,
+[data-theme="dark"] .layui-form-select .layui-input,
+[data-theme="dark"] .hy-source {
+    background: var(--hy-surface);
+    color: var(--hy-text);
+    border-color: var(--hy-border);
+}
+
+[data-theme="dark"] .layui-form-select dl {
+    background: var(--hy-surface);
+    color: var(--hy-text);
+    border-color: var(--hy-border);
+}
+
+    [data-theme="dark"] .layui-form-select dl dd:hover,
+    [data-theme="dark"] .layui-form-select dl dd.layui-this {
+        background: var(--hy-primary-soft);
+        color: var(--hy-text);
+    }
+
+[data-theme="dark"] .layui-form-select .layui-edge {
+    border-top-color: var(--hy-text-dim);
+}
+
+[data-theme="dark"] .hy-progress-wrap .layui-progress {
+    background-color: #2c3744;
+}
+
+/* —— 浮层在暗色下的表面色 ——
+   layui 默认给 .layui-layer / .layui-panel / .layui-menu 写死白底，
+   文字又继承页面的浅色主题字 → 白底浅字看不清（2026-10-08 用户反馈）。 */
+[data-theme="dark"] .layui-layer,
+[data-theme="dark"] .layui-panel,
+[data-theme="dark"] .layui-menu {
+    background: var(--hy-surface);
+    color: var(--hy-text);
+}
+
+/* msg 轻提示的浅灰描边（layui 写死 #d3d4d3） */
+[data-theme="dark"] .layui-layer-msg {
+    border-color: var(--hy-border);
+}
+
+/* confirm 对话框：标题栏与底部按钮（layui 写死 #fff/#333） */
+[data-theme="dark"] .layui-layer-title {
+    background: var(--hy-surface);
+    color: var(--hy-text);
+    border-bottom-color: var(--hy-border-soft);
+}
+
+[data-theme="dark"] .layui-layer-btn a {
+    background: var(--hy-surface);
+    color: var(--hy-text);
+    border-color: var(--hy-border);
+}
+
+/* 主操作按钮保留强调色，别被上面的通用规则盖成暗色面 */
+[data-theme="dark"] .layui-layer-btn .layui-layer-btn0 {
+    background: var(--hy-accent);
+    border-color: var(--hy-accent);
+    color: #fff;
+}
+
+/* layui 次要按钮（弹窗关闭/复制、清空、下载等）：默认 #5f5f5f 字暗色下不可读 */
+[data-theme="dark"] .layui-btn-primary {
+    background: 0 0;
+    color: var(--hy-text);
+    border-color: var(--hy-border);
+}
+
+    [data-theme="dark"] .layui-btn-primary:hover {
+        border-color: var(--hy-primary);
+        color: var(--hy-text);
+    }
+
+/* dropdown（语言切换器）菜单项 */
+[data-theme="dark"] .layui-menu li {
+    color: var(--hy-text);
+}
+
+    [data-theme="dark"] .layui-menu li:hover {
+        background: var(--hy-surface-soft);
+        color: var(--hy-text);
+    }
